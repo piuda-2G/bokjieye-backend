@@ -193,11 +193,10 @@ def searchBykeyword(keyword):
             }
         }
     )
-
     rawResult = es.search(index="multiple", body=body)["hits"]["hits"][0]["_source"]
     source = rawResult["from"]
-    result = searchById(source, rawResult["id"])
-    return result
+    result = searchById(source, rawResult["id"])["_source"]
+    return result, source
 
 
 ### ElasticSearch Pagination  ###
