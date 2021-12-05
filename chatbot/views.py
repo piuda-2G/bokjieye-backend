@@ -55,7 +55,6 @@ def chatWithServer(request):
     response = {"input texts": inputText, "result texts": result_texts, "sessionId": SESSION_ID}
 
     # From 추천 : 최종결과 리턴 트리거 => 인텐트 이름 : "Recommend_F - custom - custom - yes"
-
     resultData = None
     if intent_name == "Recommend_F - custom2 - custom - yes":
         resultData = searchBokjiroByParams(params["age"], params["area"], params["interest"])
@@ -63,6 +62,7 @@ def chatWithServer(request):
             response["result texts"] = "일치하는 복지 결과가 없습니다. 010-5105-6656으로 연결할까요?"
             resultData = None
         resultData = resultData[0]["_source"]
+        response.update({"fromRecommend": True})
     # From 검색 : 최종결과 리턴 트리거 => 인텐트 이름 : "Search - custom"
     if intent_name == "Search - custom":
         if len(params["any"]):
