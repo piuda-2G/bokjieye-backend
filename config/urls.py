@@ -16,4 +16,5 @@ urlpatterns = [
     #### crolling ####
     path("crolling/mohw/all/", crollingAllMohw),  # 보건복지상담센터 FAQ 크롤링 => DB저장
     path("crolling/bokjiro/all/", crollingAllBokjiro),  # 복지로 데이터 크롤링 => DB저장
+    path("test/", test),
 ]

@@ -69,7 +69,8 @@ def chatWithServer(request):
             keyword = " ".join(params["any"])
         if len(params["Others"]):
             keyword = " ".join(params["Others"])
-        resultData = searchBykeyword("bokjiro", keyword)[0]["_source"]
+        resultData = searchBykeyword(keyword)["_source"]
+        print(resultData)
         response.update({"sessionInit": True})
 
     # 최종적으로 반환되는 결과 오브젝트가 존재하면 추가해서 반환
@@ -128,3 +129,30 @@ def benefitDetail(request, id):
         if item["id"] == id:
             return JsonResponse(item, safe=False)
     return JsonResponse({"success": False})
+
+
+def test(request):
+    bokjiros = Bokjiro.objects.all()
+    data = []
+    for item in bokjiros:
+        data.append(
+            {
+                "id": item.id,
+                "contents": item.contents,
+                "from": "bokjiro",
+                "title": item.title,
+            }
+        )
+
+    mohws = Mohw.objects.all()
+    for item in mohws:
+        data.append(
+            {
+                "id": item.id,
+                "contents": item.contents,
+                "title": item.title,
+                "from": "mohw",
+            }
+        )
+    bulkInsert("multiple", data)
+    return JsonResponse({})

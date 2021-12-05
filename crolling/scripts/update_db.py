@@ -174,5 +174,14 @@ def run():
                     "inserted_date": item.db_inserted_date,
                 }
                 documentInsert("bokjiro", dtoForElasticsearch)
+                documentInsert(
+                    "multiple",
+                    {
+                        "id": insertedObject.id,
+                        "title": insertedObject.title,
+                        "contents": insertedObject.contents,
+                        "from": "bokjiro",
+                    },
+                )
         i = i + 1
         time.sleep(0.25)

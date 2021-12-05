@@ -172,7 +172,7 @@ def searchById(index, id):
 #   @return
 #       results : Dictionary  #검색결과는 results["hits"]["hits"]에 List형태로 리턴
 #   '추천','검색' 모두 사용
-def searchBykeyword(index, keyword):
+def searchBykeyword(keyword):
     if isinstance(keyword, list):
         keyword = " ".join(keyword)
     body = json.dumps(
@@ -180,7 +180,7 @@ def searchBykeyword(index, keyword):
             "query": {
                 "bool": {
                     "should": [
-                        {"match": {"title": {"query": keyword, "boost": 3}}},
+                        {"match": {"title": {"query": keyword, "boost": 2}}},
                         {
                             "match": {
                                 "contents": {
@@ -193,8 +193,11 @@ def searchBykeyword(index, keyword):
             }
         }
     )
-    results = es.search(index=index, body=body)
-    return results["hits"]["hits"]
+
+    rawResult = es.search(index="multiple", body=body)["hits"]["hits"][0]["_source"]
+    source = rawResult["from"]
+    result = searchById(source, rawResult["id"])
+    return result
 
 
 ### ElasticSearch Pagination  ###
