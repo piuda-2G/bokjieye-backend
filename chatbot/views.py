@@ -62,13 +62,14 @@ def chatWithServer(request):
         if not len(resultData):
             response["result texts"] = "일치하는 복지 결과가 없습니다. 010-5105-6656으로 연결할까요?"
             resultData = None
+        resultData = resultData[0]["_source"]
     # From 검색 : 최종결과 리턴 트리거 => 인텐트 이름 : "Search - custom"
     if intent_name == "Search - custom":
         if len(params["any"]):
             keyword = " ".join(params["any"])
         if len(params["Others"]):
             keyword = " ".join(params["Others"])
-        resultData = searchBykeyword("bokjiro", keyword)
+        resultData = searchBykeyword("bokjiro", keyword)[0]["_source"]
         response.update({"sessionInit": True})
 
     # 최종적으로 반환되는 결과 오브젝트가 존재하면 추가해서 반환
