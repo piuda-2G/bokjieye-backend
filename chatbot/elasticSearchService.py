@@ -1,6 +1,8 @@
 import json
+from re import T
 from elasticsearch import Elasticsearch, helpers
 from django.conf import settings
+from datetime import datetime
 
 host = getattr(settings, "ELK_BASE_URL")
 es = Elasticsearch(host)
@@ -51,6 +53,14 @@ def bulkInsert(index, data):
 def documentInsert(index, item):
     if index == "bokjiro":
         es.index(index=index, doc_type="_doc", body=item)
+
+
+def countDocuments():
+    today = datetime.today().strftime("%Y-%m-%d")
+    body = {"query": {"range": {"inserted_date": {"gte": today, "lte": today}}}}
+    total = es.count(index="bokjiro", doc_type="_doc")["count"]
+    new = es.count(index="bokjiro", doc_type="_doc", body=body)["count"]
+    return {"total": total, "new": new}
 
 
 ### ElasticSearch 복지로 Search By Age, Area, Interest ###
@@ -278,7 +288,7 @@ mohw index 생성
       },
       "inserted_date": {
         "type": "date",
-        "format": "yyyy-mm-dd"
+        "format": "yyyy-MM-dd"
       }
     }
   }
@@ -379,7 +389,7 @@ bokjiro index 생성
       },
       "inserted_date": {
         "type": "date",
-        "format": "yyyy-mm-dd"
+        "format": "yyyy-MM-dd"
       }
     }
   }

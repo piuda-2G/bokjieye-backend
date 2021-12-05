@@ -6,8 +6,6 @@ from google.cloud import dialogflow
 from proto import Message
 from chatbot.elasticSearchService import *
 from .models import *
-from django.core.paginator import Paginator
-from django.db.models import Q
 
 # dialogFlow서버에서 결과 받아오기
 # return : 리턴된 응답 메시지, 응답한 인텐트 이름, 입력된 파라미터들 Object
@@ -88,6 +86,13 @@ def pagedBokjiroList(request):
     results = getPagedList(page, central, local, keyword)
 
     return JsonResponse(results, safe=False)
+
+
+@csrf_exempt
+# 전체 복지정보, 신규 복지정보 counter
+def countItems(request):
+    context = countDocuments()
+    return JsonResponse(context, safe=False)
 
 
 @csrf_exempt
