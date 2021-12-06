@@ -139,11 +139,11 @@ def bokjoroDetail(request, id):
                 {"number": rawPhones["servSeDetailLink"], "name": rawPhones["servSeDetailNm"]}
             )
     result = {
-        "id": parsedDict.get("servId", ""),  # id
-        "title": parsedDict.get("servNm", ""),  # 서비스이름
-        "contents": parsedDict.get("alwServCn", ""),  # 서비스내용
-        "target": parsedDict.get("tgtrDtlCn", ""),  # 지원대상
-        "department": parsedDict.get("jurMnofNm", ""),  # 소관부처명
+        "id": parsedDict.get("servId", " "),  # id
+        "title": parsedDict.get("servNm", " "),  # 서비스이름
+        "contents": parsedDict.get("alwServCn", " "),  # 서비스내용
+        "target": parsedDict.get("tgtrDtlCn", " "),  # 지원대상
+        "department": parsedDict.get("jurMnofNm", " "),  # 소관부처명
         "phones": processedPhones,  # 연락가능번호 List
     }
     # result = searchById("bokjiro", id)
