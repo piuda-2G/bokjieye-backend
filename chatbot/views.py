@@ -74,8 +74,6 @@ def chatWithServer(request):
         if len(params["Others"]):
             keyword = " ".join(params["Others"])
         resultData, source = searchBykeyword(keyword)
-        if source == "bokjiro":
-            response.update({"fromBokjiro": True})
         response.update({"sessionInit": True})
 
     # 최종적으로 반환되는 결과 오브젝트가 존재하면 추가해서 반환
