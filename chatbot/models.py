@@ -37,3 +37,16 @@ class Mohw(models.Model):
 
     class Meta:
         db_table = "mohw"
+
+
+# 복지혜택
+class Benefit(models.Model):
+    id = models.AutoField(primary_key=True)
+    field = models.CharField(max_length=30, null=False, blank=True, default="")
+    title = models.CharField(max_length=100, null=False, blank=True, default="")
+    contents = models.TextField(null=False, blank=True, default="")
+    who = models.TextField(null=False, blank=True, default="")
+    howTo = models.TextField(null=False, blank=True, default="")
+
+    class Meta:
+        db_table = "benefit"

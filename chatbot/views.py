@@ -155,41 +155,21 @@ def bokjoroDetail(request, id):
 
 
 def benefit(request, category):
-    tempList = [
-        {"id": "1-ASDF", "title": "임시제목1", "contents": "임시내용1"},
-        {"id": "2-ASDF", "title": "임시제목2", "contents": "임시내용2"},
-        {"id": "3-ASDF", "title": "임시제목3", "contents": "임시내용3"},
-        {"id": "4-ASDF", "title": "임시제목4", "contents": "임시내용4"},
-        {"id": "5-ASDF", "title": "임시제목5", "contents": "임시내용5"},
-    ]
-    return JsonResponse(tempList, safe=False)
+    items = Benefit.objects.filter(field=category)
+    listItems = list(items.values())
+
+    return JsonResponse(listItems, safe=False)
 
 
 def benefitDetail(request, id):
-    tempDB = [
-        {"id": "1-ASDF", "title": "임시제목1", "contents": "임시내용1"},
-        {"id": "2-ASDF", "title": "임시제목2", "contents": "임시내용2"},
-        {"id": "3-ASDF", "title": "임시제목3", "contents": "임시내용3"},
-        {"id": "4-ASDF", "title": "임시제목4", "contents": "임시내용4"},
-        {"id": "5-ASDF", "title": "임시제목5", "contents": "임시내용5"},
-    ]
-    for item in tempDB:
-        if item["id"] == id:
-            return JsonResponse(item, safe=False)
-    return JsonResponse({"success": False})
+    id = int(id)
+    item = Benefit.objects.get(id=id)
+    result = {
+        "title": item.title,
+        "contents": item.contents,
+        "who": item.who,
+        "howTo": item.howTo,
+        "field": item.field,
+    }
 
-
-def test(request):
-    import csv
-
-    csv_file_name = "C:\\test.xlsx"
-    try:
-        f = open("csv_file_name", "r", encoding="utf-8")
-        rdr = csv.reader(f)
-        for line in rdr:
-            print(line)
-        f.close()
-    except Exception as e:
-        print(e)
-        f.close()
-    return JsonResponse({})
+    return JsonResponse(result, safe=False)
