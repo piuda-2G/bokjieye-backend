@@ -93,9 +93,11 @@ def chatWithServer(request):
                 phone = "129"
             response.update({"call": True, "number": phone})
             if phone == "129":
-                response["result texts"] = "연결된 전화번호가 없어서 보건복지 상담센터로 연결합니다."
+                response["result texts"] = ""
+                response.update({"exist": False})
             else:
-                response["result texts"] = "해당 복지와 관련된 부서로 연결합니다."
+                response["result texts"] = ""
+                response.update({"exist": True})
         if intent_name == "Recommend_F - custom2 - custom - yes - no":
             response[
                 "result texts"
