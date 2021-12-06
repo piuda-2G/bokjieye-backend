@@ -114,7 +114,9 @@ def pagedBokjiroList(request):
     local = request.GET.get("local", None)
     keyword = request.GET.get("keyword", None)
     results = getPagedList(page, central, local, keyword)
-
+    for item in results:
+        if not item["_source"]["contents"]:
+            item["_source"]["contents"] = "자세한 내용을 원하시면 클릭해주세요."
     return JsonResponse(results, safe=False)
 
 
