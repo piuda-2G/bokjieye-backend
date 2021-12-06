@@ -124,7 +124,6 @@ def bokjoroDetail(request, id):
     params = f"?serviceKey={API_KEY}&callTp=D&servId={id}"
     response = requests.get(DOMAIN + params).content.decode("utf-8")
     parsedDict = xmltodict.parse(response).get("wantedDtl", {})
-    print(parsedDict)
     rawPhones = parsedDict.get("inqplCtadrList", {})
     processedPhones = []
     if isinstance(rawPhones, list):
@@ -138,12 +137,25 @@ def bokjoroDetail(request, id):
             processedPhones.append(
                 {"number": rawPhones["servSeDetailLink"], "name": rawPhones["servSeDetailNm"]}
             )
+
+    if parsedDict.get("jurMnofNm"):
+        department = parsedDict.get("jurMnofNm")
+    else:
+        department = ""
+    if parsedDict.get("tgtrDtlCn"):
+        target = parsedDict.get("tgtrDtlCn")
+    else:
+        target = ""
+    if parsedDict.get("alwServCn"):
+        contents = parsedDict.get("alwServCn")
+    else:
+        contents = ""
     result = {
         "id": parsedDict.get("servId", " "),  # id
         "title": parsedDict.get("servNm", " "),  # 서비스이름
-        "contents": parsedDict.get("alwServCn", " "),  # 서비스내용
-        "target": parsedDict.get("tgtrDtlCn", " "),  # 지원대상
-        "department": parsedDict.get("jurMnofNm", " "),  # 소관부처명
+        "contents": contents,  # 서비스내용
+        "target": target,  # 지원대상
+        "department": department,  # 소관부처명
         "phones": processedPhones,  # 연락가능번호 List
     }
     # result = searchById("bokjiro", id)
