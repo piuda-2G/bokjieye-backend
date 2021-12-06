@@ -84,8 +84,12 @@ def chatWithServer(request):
 
     # 전화연결 yes or no
     if intent_name == "Recommend_F - custom2 - custom - yes - yes":
-        number = json.loads(request.body)["number"]
+        number = json.loads(request.body).get("number", "129")
         response.update({"call": True, "number": number})
+        if number == "129":
+            response["result texts"] = "연결된 전화번호가 없어서 복지로로 연결합니다."
+        else:
+            response["result texts"] = "해당 부서로 연결합니다."
     if intent_name == "Recommend_F - custom2 - custom - yes - no":
         response["result texts"] = "전화를 연결하지 않을래~ 우우~ 예~"
         response.update({"call": False})
@@ -135,11 +139,11 @@ def bokjoroDetail(request, id):
                 {"number": rawPhones["servSeDetailLink"], "name": rawPhones["servSeDetailNm"]}
             )
     result = {
-        "id": parsedDict.get("servId", None),  # id
-        "title": parsedDict.get("servNm", None),  # 서비스이름
-        "contents": parsedDict.get("alwServCn", None),  # 서비스내용
-        "target": parsedDict.get("tgtrDtlCn", None),  # 지원대상
-        "department": parsedDict.get("jurMnofNm", None),  # 소관부처명
+        "id": parsedDict.get("servId", ""),  # id
+        "title": parsedDict.get("servNm", ""),  # 서비스이름
+        "contents": parsedDict.get("alwServCn", ""),  # 서비스내용
+        "target": parsedDict.get("tgtrDtlCn", ""),  # 지원대상
+        "department": parsedDict.get("jurMnofNm", ""),  # 소관부처명
         "phones": processedPhones,  # 연락가능번호 List
     }
     # result = searchById("bokjiro", id)
@@ -169,3 +173,19 @@ def benefitDetail(request, id):
         if item["id"] == id:
             return JsonResponse(item, safe=False)
     return JsonResponse({"success": False})
+
+
+def test(request):
+    import csv
+
+    csv_file_name = "C:\\test.xlsx"
+    try:
+        f = open("csv_file_name", "r", encoding="utf-8")
+        rdr = csv.reader(f)
+        for line in rdr:
+            print(line)
+        f.close()
+    except Exception as e:
+        print(e)
+        f.close()
+    return JsonResponse({})
