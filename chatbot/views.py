@@ -1,5 +1,6 @@
-import json, os
-from config.settings import BASE_DIR
+from datetime import time
+import json, os, requests, xmltodict
+from config.settings import BASE_DIR, API_KEY
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from google.cloud import dialogflow
@@ -58,7 +59,6 @@ def chatWithServer(request):
     resultData = None
     if intent_name == "Recommend_F - custom2 - custom - yes":
         resultData = searchBokjiroByParams(params["age"], params["area"], params["interest"])
-        print(resultData)
         if len(resultData):
             resultData = resultData[0]["_source"]
             response.update({"fromBokjiro": True})
@@ -81,6 +81,14 @@ def chatWithServer(request):
     # 최종적으로 반환되는 결과 오브젝트가 존재하면 추가해서 반환
     if resultData:
         response.update({"resultData": resultData})
+
+    # 전화연결 yes or no
+    if intent_name == "Recommend_F - custom2 - custom - yes - yes":
+        number = json.loads(request.body)["number"]
+        response.update({"call": True, "number": number})
+    if intent_name == "Recommend_F - custom2 - custom - yes - no":
+        response["result texts"] = "전화를 연결하지 않을래~ 우우~ 예~"
+        response.update({"call": False})
     return JsonResponse(response, safe=False)
 
 
@@ -106,12 +114,39 @@ def countItems(request):
 @csrf_exempt
 # 복지정보 detail 정보 return
 def bokjoroDetail(request, id):
-    result = searchById("bokjiro", id)
+    # 복지로 자료 ID
+    DOMAIN = "http://apis.data.go.kr/B554287/NationalWelfareInformations/NationalWelfaredetailed"
+
+    params = f"?serviceKey={API_KEY}&callTp=D&servId={id}"
+    response = requests.get(DOMAIN + params).content.decode("utf-8")
+    parsedDict = xmltodict.parse(response).get("wantedDtl", {})
+    print(parsedDict)
+    rawPhones = parsedDict.get("inqplCtadrList", {})
+    processedPhones = []
+    if isinstance(rawPhones, list):
+        for item in rawPhones:
+            if item.get("servSeDetailLink", None) and item.get("servSeDetailNm", None):
+                processedPhones.append(
+                    {"number": item["servSeDetailLink"], "name": item["servSeDetailNm"]}
+                )
+    else:
+        if rawPhones.get("servSeDetailLink", None) and rawPhones.get("servSeDetailNm", None):
+            processedPhones.append(
+                {"number": rawPhones["servSeDetailLink"], "name": rawPhones["servSeDetailNm"]}
+            )
+    result = {
+        "id": parsedDict.get("servId", None),  # id
+        "title": parsedDict.get("servNm", None),  # 서비스이름
+        "contents": parsedDict.get("alwServCn", None),  # 서비스내용
+        "target": parsedDict.get("tgtrDtlCn", None),  # 지원대상
+        "department": parsedDict.get("jurMnofNm", None),  # 소관부처명
+        "phones": processedPhones,  # 연락가능번호 List
+    }
+    # result = searchById("bokjiro", id)
     return JsonResponse(result, safe=False)
 
 
 def benefit(request, category):
-    print(category)
     tempList = [
         {"id": "1-ASDF", "title": "임시제목1", "contents": "임시내용1"},
         {"id": "2-ASDF", "title": "임시제목2", "contents": "임시내용2"},
@@ -134,30 +169,3 @@ def benefitDetail(request, id):
         if item["id"] == id:
             return JsonResponse(item, safe=False)
     return JsonResponse({"success": False})
-
-
-def test(request):
-    bokjiros = Bokjiro.objects.all()
-    data = []
-    for item in bokjiros:
-        data.append(
-            {
-                "id": item.id,
-                "contents": item.contents,
-                "from": "bokjiro",
-                "title": item.title,
-            }
-        )
-
-    mohws = Mohw.objects.all()
-    for item in mohws:
-        data.append(
-            {
-                "id": item.id,
-                "contents": item.contents,
-                "title": item.title,
-                "from": "mohw",
-            }
-        )
-    bulkInsert("multiple", data)
-    return JsonResponse({})
