@@ -63,10 +63,10 @@ def chatWithServer(request):
             resultData = resultData[0]["_source"]
             response.update({"fromBokjiro": True})
         else:
-            response["result texts"] = "일치하는 복지 결과가 없습니다. 010-5105-6656으로 연결할까요?"
+            response["result texts"] = "일치하는 복지 결과가 없습니다. 보건복지 상담센터로 연결하시겠습니까?"
             response.update({"noResults": True})
             resultData = None
-
+        response.update({"fromRecommend": True})
     # From 검색 : 최종결과 리턴 트리거 => 인텐트 이름 : "Search - custom"
     if intent_name == "Search - custom":
         if len(params["any"]):
@@ -84,8 +84,11 @@ def chatWithServer(request):
 
     # 전화연결 yes or no
     if intent_name == "Recommend_F - custom2 - custom - yes - yes":
-        itemId = json.loads(request.body)["request_id"]
-        phone = GetBokjoroPhone(itemId)
+        itemId = json.loads(request.body).get("request_id") or None
+        if itemId is not None:
+            phone = GetBokjoroPhone(itemId)
+        else:
+            phone = "129"
         response.update({"call": True, "number": phone})
         if phone == "129":
             response["result texts"] = "연결된 전화번호가 없어서 보건복지 상담센터로 연결합니다."
@@ -184,6 +187,7 @@ def GetBokjoroPhone(id):
     params = f"?serviceKey={API_KEY}&callTp=D&servId={id}"
     response = requests.get(DOMAIN + params).content.decode("utf-8")
     parsedDict = xmltodict.parse(response).get("wantedDtl", {})
+    print(parsedDict)
     rawPhones = parsedDict.get("inqplCtadrList", {})
     processedPhones = []
     if isinstance(rawPhones, list):
@@ -199,6 +203,6 @@ def GetBokjoroPhone(id):
             )
 
     if len(processedPhones):
-        return processedPhones[0]["number"]
+        return processedPhones[0]["number"].replace("-", "")
     else:
         return "129"
