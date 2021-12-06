@@ -138,27 +138,19 @@ def bokjoroDetail(request, id):
                 {"number": rawPhones["servSeDetailLink"], "name": rawPhones["servSeDetailNm"]}
             )
 
-    if parsedDict.get("jurMnofNm"):
-        department = parsedDict.get("jurMnofNm")
-    else:
-        department = ""
-    if parsedDict.get("tgtrDtlCn"):
-        target = parsedDict.get("tgtrDtlCn")
-    else:
-        target = ""
-    if parsedDict.get("alwServCn"):
-        contents = parsedDict.get("alwServCn")
-    else:
-        contents = ""
+    item_id = parsedDict.get("servId") or ""
+    title = parsedDict.get("servNm") or ""
+    contents = parsedDict.get("alwServCn") or ""
+    target = parsedDict.get("tgtrDtlCn") or ""
+    department = parsedDict.get("jurMnofNm") or ""
     result = {
-        "id": parsedDict.get("servId", " "),  # id
-        "title": parsedDict.get("servNm", " "),  # 서비스이름
+        "id": item_id,  # id
+        "title": title,  # 서비스이름
         "contents": contents,  # 서비스내용
         "target": target,  # 지원대상
         "department": department,  # 소관부처명
         "phones": processedPhones,  # 연락가능번호 List
     }
-    # result = searchById("bokjiro", id)
     return JsonResponse(result, safe=False)
 
 
