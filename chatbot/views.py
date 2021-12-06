@@ -97,7 +97,7 @@ def chatWithServer(request):
                 response.update({"exist": False})
             else:
                 response["result texts"] = ""
-                response.update({"exist": True})
+                response.update({"exist": Truex})
         if intent_name == "Recommend_F - custom2 - custom - yes - no":
             response[
                 "result texts"
@@ -152,7 +152,10 @@ def bokjoroDetail(request, id):
     title = parsedDict.get("servNm") or ""
     contents = parsedDict.get("alwServCn") or ""
     target = parsedDict.get("tgtrDtlCn") or ""
-    department = parsedDict.get("jurMnofNm") or ""
+    department = (
+        parsedDict.get("jurMnofNm")
+        or f"소관부처 정보가 존재하지 않습니다. 자세한 내용을 원하시면 https://www.bokjiro.go.kr/ssis-teu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId={id}를 클릭해주세요."
+    )
     result = {
         "id": item_id,  # id
         "title": title,  # 서비스이름
