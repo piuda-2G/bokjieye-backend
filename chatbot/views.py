@@ -57,6 +57,7 @@ def chatWithServer(request):
 
     # From 추천 : 최종결과 리턴 트리거 => 인텐트 이름 : "Recommend_F - custom - custom - yes"
     resultData = None
+    searchFlag = False
     if intent_name == "Recommend_F - custom2 - custom - yes":
         resultData = searchBokjiroByParams(params["age"], params["area"], params["interest"])
         if len(resultData):
@@ -74,27 +75,32 @@ def chatWithServer(request):
         if len(params["Others"]):
             keyword = " ".join(params["Others"])
         resultData, source = searchBykeyword(keyword)
+        if source == "bokjiro":
+            response.update({"fromBokjiro": True})
         response.update({"sessionInit": True})
-
+        searchFlag = True
     # 최종적으로 반환되는 결과 오브젝트가 존재하면 추가해서 반환
     if resultData:
         response.update({"resultData": resultData})
 
     # 전화연결 yes or no
-    if intent_name == "Recommend_F - custom2 - custom - yes - yes":
-        itemId = json.loads(request.body).get("request_id") or None
-        if itemId is not None:
-            phone = GetBokjoroPhone(itemId)
-        else:
-            phone = "129"
-        response.update({"call": True, "number": phone})
-        if phone == "129":
-            response["result texts"] = "연결된 전화번호가 없어서 보건복지 상담센터로 연결합니다."
-        else:
-            response["result texts"] = "해당 복지와 관련된 부서로 연결합니다."
-    if intent_name == "Recommend_F - custom2 - custom - yes - no":
-        response["result texts"] = "전화를 연결을 하지 않겠습니다. 다시 복지정보 추천을 원하실 경우 추천, 검색을 원하실 경우 검색이라 말해주세요."
-        response.update({"call": False})
+    if not searchFlag:
+        if intent_name == "Recommend_F - custom2 - custom - yes - yes":
+            itemId = json.loads(request.body).get("request_id") or None
+            if itemId is not None:
+                phone = GetBokjoroPhone(itemId)
+            else:
+                phone = "129"
+            response.update({"call": True, "number": phone})
+            if phone == "129":
+                response["result texts"] = "연결된 전화번호가 없어서 보건복지 상담센터로 연결합니다."
+            else:
+                response["result texts"] = "해당 복지와 관련된 부서로 연결합니다."
+        if intent_name == "Recommend_F - custom2 - custom - yes - no":
+            response[
+                "result texts"
+            ] = "전화를 연결을 하지 않겠습니다. 다시 복지정보 추천을 원하실 경우 추천, 검색을 원하실 경우 검색이라 말해주세요."
+            response.update({"call": False})
     return JsonResponse(response, safe=False)
 
 
