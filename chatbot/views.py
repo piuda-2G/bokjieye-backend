@@ -84,14 +84,15 @@ def chatWithServer(request):
 
     # 전화연결 yes or no
     if intent_name == "Recommend_F - custom2 - custom - yes - yes":
-        number = json.loads(request.body).get("number", "129")
-        response.update({"call": True, "number": number})
-        if number == "129":
-            response["result texts"] = "연결된 전화번호가 없어서 복지로로 연결합니다."
+        itemId = json.loads(request.body)["request_id"]
+        phone = GetBokjoroPhone(itemId)
+        response.update({"call": True, "number": phone})
+        if phone == "129":
+            response["result texts"] = "연결된 전화번호가 없어서 보건복지 상담센터로 연결합니다."
         else:
-            response["result texts"] = "해당 부서로 연결합니다."
+            response["result texts"] = "해당 복지와 관련된 부서로 연결합니다."
     if intent_name == "Recommend_F - custom2 - custom - yes - no":
-        response["result texts"] = "전화를 연결하지 않을래~ 우우~ 예~"
+        response["result texts"] = "전화를 연결을 하지 않겠습니다. 다시 복지정보 추천을 원하실 경우 추천, 검색을 원하실 경우 검색이라 말해주세요."
         response.update({"call": False})
     return JsonResponse(response, safe=False)
 
@@ -173,3 +174,31 @@ def benefitDetail(request, id):
     }
 
     return JsonResponse(result, safe=False)
+
+
+# 복지정보 detail 정보 return
+def GetBokjoroPhone(id):
+    # 복지로 자료 ID
+    DOMAIN = "http://apis.data.go.kr/B554287/NationalWelfareInformations/NationalWelfaredetailed"
+
+    params = f"?serviceKey={API_KEY}&callTp=D&servId={id}"
+    response = requests.get(DOMAIN + params).content.decode("utf-8")
+    parsedDict = xmltodict.parse(response).get("wantedDtl", {})
+    rawPhones = parsedDict.get("inqplCtadrList", {})
+    processedPhones = []
+    if isinstance(rawPhones, list):
+        for item in rawPhones:
+            if item.get("servSeDetailLink", None) and item.get("servSeDetailNm", None):
+                processedPhones.append(
+                    {"number": item["servSeDetailLink"], "name": item["servSeDetailNm"]}
+                )
+    else:
+        if rawPhones.get("servSeDetailLink", None) and rawPhones.get("servSeDetailNm", None):
+            processedPhones.append(
+                {"number": rawPhones["servSeDetailLink"], "name": rawPhones["servSeDetailNm"]}
+            )
+
+    if len(processedPhones):
+        return processedPhones[0]["number"]
+    else:
+        return "129"
